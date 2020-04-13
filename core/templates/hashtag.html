@@ -62,6 +62,11 @@
                   {%endif %}
                 </a>
               </div>
+              {% if user.is_authenticated and tweet.author == user.username %}
+              <a class="level-right" href="{% url 'delete' id=tweet.id%}">
+                delete
+              </a>
+              {%endif %}
             </nav>
           </div>
           {% endfor %}

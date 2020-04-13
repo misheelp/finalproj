@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from core.models import Tweet, Hashtag
+from django.http import HttpResponseRedirect
+
 # Create your views here.
 
 def splash(request):
-  tweets = Tweet.objects.all()
+  tweets = Tweet.objects.all().order_by("id").reverse()
   if request.method == "POST":
     content = request.POST["content"]
     tweet = Tweet.objects.create(content=content, author=request.user.username)
@@ -43,10 +45,10 @@ def hashtag(request, id):
 
 def home(request):
   return render(request, "home.html", {})  
-
+  
 def profile(request):
   tweets = Tweet.objects.filter(author=request.user.username)
-  return render(request, "profile.html", {"tweets": tweets})  
+  return render(request, "profile.html", {"tweets": tweets}) 
 
 def login_(request):
     if request.method == "POST":
@@ -61,6 +63,12 @@ def login_(request):
 def logout_(request):
     logout(request)
     return redirect('signup')
+
+def delete(request, id):
+  if request.method == "GET":
+    tweet = Tweet.objects.get(id=id)
+    tweet.delete()
+  return redirect('/')
 
 def signup_view(request):
 	user = User.objects.create_user(username=request.POST['username'],

@@ -25,9 +25,7 @@ SECRET_KEY = 'o0vix(kwv%4y$!1fzpu))462&3fp9lwq)m9&al&5%@4of0$e02'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-  'twitter-clonecis192.herokuapp.com', 
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
