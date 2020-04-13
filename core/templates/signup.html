@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>a Bird Website</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  </head>
+  <body>
+    <section class="section">
+      <h1 class="title has-text-centered is-1 has-text-info">
+        <a class="has-text-info" href="/">Twitter</a>
+      </h1>
+    </section>
+
+    <section>
+      <div class="columns">
+        <div class="column is-4"></div>
+        <div class="column is-4 box">
+          <div class="container"> 
+            <h1 class="title is-4">Signup</h1>
+            <form method="POST" action="signup">
+              {% csrf_token %}         
+              <label class="label">Username</label>
+              <div class="control has-icons-left has-icons-right">
+                  <input class="input" name="username" placeholder="username">
+                  <span class="icon is-small is-left">
+                  <i class="fas fa-user"></i>
+                  </span>
+              </div>
+              <div class="field">
+                <label class="label">Email</label>
+                <div class="control has-icons-left has-icons-right">
+                  <input class="input" name="email" placeholder="email">
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
+              </div>
+              <label class="label">Password</label>
+              <div class="field">
+                  <p class="control has-icons-left">
+                    <input class="input" name="password" placeholder="password" type="password">
+                    <span class="icon is-small is-left">
+                      <i class="fas fa-lock"></i>
+                    </span>
+                  </p>
+              </div>
+              <input class="button is-info is-outlined" type="submit" />
+            </form>
+          </div>     
+          <div class="container"> 
+            <h1 class="title is-4">Log in</h1>
+            <form method="POST" action="login">
+              {% csrf_token %}         
+              <label class="label">Username</label>
+              <div class="control has-icons-left has-icons-right">
+                  <input class="input" type="text" name="username" placeholder="username">
+                  <span class="icon is-small is-left">
+                  <i class="fas fa-user"></i>
+                  </span>
+              </div>
+              <label class="label">Password</label>
+              <div class="field">
+                  <p class="control has-icons-left">
+                    <input class="input" name="password" placeholder="password" type="password">
+                    <span class="icon is-small is-left">
+                      <i class="fas fa-lock"></i>
+                    </span>
+                  </p>
+              </div>
+              <input class="button is-info is-outlined" type="submit" />
+            </form>
+          </div>
+        </div> 
+        <div class = "column is-4"></div>  
+      </div>
+    </section>
+  </body>
+

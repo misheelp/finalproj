@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>a Bird Website</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title is-2">
+        <a class="has-text-info" href="splsh">Twitter</a>
+      </h1>
+      
+      <div class="columns">
+        <div class="column is-3"></div>
+        <div class="column is-6 container has-text-left">
+          <form method="POST" action=''>
+            <label class="title is-4">Write a Tweet</label>
+            {% csrf_token %}
+            <div class="field">
+              <div class="control">
+                <input class="input"style="margin-top: 10px;" name="content" placeholder="insert content here" />
+              </div>
+            </div>
+            <input class="button is-info is-outlined" type="submit" value="Create Tweet" style="margin-bottom: 10px;"/>
+        </form>
+
+          {% for tweet in tweets %}
+          <div class="box content">
+            <div class="content">
+              <p>
+                <strong>{{tweet.author}}</strong> <small>{{tweet.time}}</small>
+                <br>
+                {{tweet.content}}
+              </p>
+            </div>
+            <nav class="level is-mobile">
+              <div class="level-left">
+                <a class="level-item">  
+                  {% if user.is_authenticated and user in tweet.likes.all %}
+                  <a href="{% url 'like' id=tweet.id %}">
+                    <span class="icon is-small has-text-danger" style="margin-right: 5px;">
+                      <i class="fas fa-heart"></i>
+                    </span>
+                  </a>
+                  {{tweet.likes.all.count}}
+                  {% elif user.is_authenticated %}
+                  <a href="{% url 'like' id=tweet.id %}">
+                    <span class="icon is-small has-text-grey-light" style="margin-right: 5px;">
+                      <i class="fas fa-heart"></i>
+                    </span>
+                  </a>
+                  {{tweet.likes.all.count}}
+                  {% else %}
+                  <a>
+                    <span class="icon is-small has-text-grey-light" style="margin-right: 5px;">
+                      <i class="fas fa-heart"></i>
+                    </span>
+                  </a>
+                  {{tweet.likes.all.count}}
+                  {% endif %}                
+                </a>
+                <a class="level-item">
+                </a>
+                <a class="level-item" style="margin-right: 2px;"> 
+                  {% if tweet.hashtag_set.all.count != 0 %}
+                  tags:
+                  {% for tag in tweet.hashtag_set.all %}
+                  <a href="{% url 'hashtag' id=tag.id%}" style="margin-left: 5px;">#{{tag.name}}</a>
+                  {% endfor %}
+                  {%endif %}
+                </a>
+              </div>
+            </nav>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="column is-3"></div>
+      </div>
+      {% if user.is_authenticated %}
+      <a class="btn btn-primary" href='profile'>profile</a>
+      <a class="btn btn-primary" href='logout'>logout</a>
+      {% else %}
+      <a class="btn btn-primary" href='login'>login</a>
+      {% endif %}
+    </div>
+  </section>
+  </body>
+</html>
+
+
+
+
