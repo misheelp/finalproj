@@ -11,3 +11,8 @@ class Tweet(models.Model):
 class Hashtag(models.Model):
   tweets = models.ManyToManyField(Tweet)
   name = models.CharField(max_length=50)
+
+class Replies(models.Model):
+  content = models.CharField(max_length=280)
+  tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+  author = models.CharField(max_length=40)

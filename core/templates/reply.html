@@ -11,30 +11,16 @@
   <section class="section">
     <div class="container">
       <h1 class="title is-2">
-        <a class="has-text-info" href="splsh">Twitter</a>
+        <a class="has-text-info">Twitter</a>
       </h1>
       
       <div class="columns">
         <div class="column is-3"></div>
         <div class="column is-6 container has-text-left">
-          <form method="POST" action=''>
-            <label class="title is-4">Write a Tweet</label>
-            {% csrf_token %}
-            <div class="field">
-              <div class="control">
-                <input class="input"style="margin-top: 10px;" name="content" placeholder="insert content here" />
-              </div>
-            </div>
-            <input class="button is-info is-outlined" type="submit" value="Create Tweet" style="margin-bottom: 10px;"/>
-        </form>
-
-          {% for tweet in tweets %}
           <div class="box content">
             <div class="content">
               <p>
-                <strong>
-                  <a class="btn btn-primary"  href="{% url 'profile' id=tweet.author%}">@{{tweet.author}}</a>
-                </strong> <small>{{tweet.time}}</small>
+                <strong>@{{tweet.author}}</strong> <small>{{tweet.time}}</small>
                 <br>
                 {{tweet.content}}
               </p>
@@ -67,7 +53,7 @@
                 </a>
                 <a class="level-item">
                 </a>
-                <a class="level-item" style="margin-right: 2px;"> 
+                <a class="level-item" style="margin-right: 2px;">  
                   {% if tweet.hashtag_set.all.count != 0 %}
                   tags:
                   {% for tag in tweet.hashtag_set.all %}
@@ -81,17 +67,47 @@
                 delete
               </a>
               {%endif %}
-              <a class="level-right" href="{% url 'reply' id=tweet.id%}">
-                see comments
-              </a>
             </nav>
+          </div>
+        </div>
+        <form method="POST" action="{% url 'reply' id=tweet.id%}">
+          <label class="title is-4">Reply</label>
+          {% csrf_token %}
+          <div class="field">
+            <div class="control">
+              <input class="input"style="margin-top: 10px;" name="content" placeholder="insert content here" />
+            </div>
+          </div>
+          <input class="button is-info is-outlined" type="submit" value="Create Tweet" style="margin-bottom: 10px;"/>
+      </form>
+        <div class="column is-3"></div>
+      </div>
+      <div>
+
+    <div class="columns">
+        <div class="column is-6 container has-text-left">
+          {% for reply in replies %} 
+          <div class="box content">
+            <div class="content">
+              <div>
+                {{reply.content}}
+              </div>
+              <nav class="level is-mobile">
+                <div class="level-right">
+                  <a class="level-item"> 
+                    @{{reply.author}}
+                  </a></div>                
+              </nav>
+            </div>
           </div>
           {% endfor %}
         </div>
-        <div class="column is-3"></div>
       </div>
+      <div class="column is-6"></div>
+    </div>
+      
+      <a class="btn btn-primary" href="/">Back</a>
       {% if user.is_authenticated %}
-      <a class="btn btn-primary" href="myprofile">profile</a>
       <a class="btn btn-primary" href='logout'>logout</a>
       {% else %}
       <a class="btn btn-primary" href='login'>login</a>
