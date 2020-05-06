@@ -3,17 +3,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from core.models import Tweet, Hashtag
 from django.http import HttpResponseRedirect
+import GetOldTweets3 as got
 
 # Create your views here.
 
 def splash(request):
-  tweets = Tweet.objects.all().order_by("id").reverse()
   if request.method == "POST":
     content = request.POST["content"]
     tweet = Tweet.objects.create(content=content, author=request.user.username)
     tags = {tag.strip("#") for tag in content.replace('#', ' #').split() if tag.startswith("#")}
     print(tags)
-#    tag = request.POST["hashtag"]
+ #    tag = request.POST["hashtag"]
  #   hasht = tag.strip()
  #   hashtag = hasht.replace(" ", "") """
     for tag in tags:
@@ -26,6 +26,9 @@ def splash(request):
       if tagExists is False:
         newtag = Hashtag.objects.create(name=tag)
         newtag.tweets.add(tweet)
+  
+  tweets = Tweet.objects.all().order_by("id").reverse()
+
   return render(request, "splash.html", {"tweets": tweets})
 
 def like(request, id):
@@ -44,6 +47,21 @@ def hashtag(request, id):
   return render(request, "hashtag.html", {"hashtag": hashtag})
 
 def home(request):
+  try:
+    user = User.objects.get(username='realDonaldTrump')
+  except User.DoesNotExist:
+    # Create a new user. There's no need to set a password
+    # because only the password from settings.py is checked.
+    user = User.objects.create_user(username='realDonaldTrump', password='Michelle11')
+    user.save()
+    
+    
+    tweetCriteria = got.manager.TweetCriteria().setUsername("realDonaldTrump")\
+                                           .setTopTweets(True)\
+                                           .setMaxTweets(10)
+    twts = got.manager.TweetManager.getTweets(tweetCriteria)
+    for tweet in twts:
+      Tweet.objects.create(content=tweet.text, author='realDonaldTrump')
   return render(request, "home.html", {})  
   
 def myprofile(request):
