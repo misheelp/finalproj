@@ -46,9 +46,14 @@ def hashtag(request, id):
 def home(request):
   return render(request, "home.html", {})  
   
-def profile(request):
+def myprofile(request):
   tweets = Tweet.objects.filter(author=request.user.username)
-  return render(request, "profile.html", {"tweets": tweets}) 
+  return render(request, "profile.html", {"tweets": tweets, "user": "me"}) 
+
+def profile(request, id):
+  user = User.objects.get(username=id)
+  tweets = Tweet.objects.filter(author=user)
+  return render(request, "profile.html", {"tweets": tweets, "user": user.username}) 
 
 def login_(request):
     if request.method == "POST":
