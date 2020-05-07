@@ -11,12 +11,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Embedding
-from keras.models import Sequential
-from keras.layers import Dense
 from keras.models import model_from_json
 import os
 
-# Create your views here.
 # generate a sequence from the model
 def generate_seq(model, tokenizer, seed_text, n_words):
 	in_text, result = seed_text, seed_text
@@ -37,50 +34,65 @@ def generate_seq(model, tokenizer, seed_text, n_words):
 		in_text, result = out_word, result + ' ' + out_word
 	return result
 
-def trainModel():
-  # source text
-  data = """ Jack and Jill went up the hill\n
-      To fetch a pail of water\n
-      Jack fell down and broke his crown\n
-      And Jill came tumbling after\n """
-  # integer encode text
+data = ""
+first_word = ""
+
+#gets the list of replies of a user
+def allTweets(User):
+  global data
+  tweet = Tweet.objects.filter(author=User.username)
+  list_of_replies = []
+  for t in tweet:
+    for r in Replies.objects.filter(tweet=t):
+      list_of_replies.append(r.content.lower())
+  data = "".join(list_of_replies)
+
+def trainModel(User):
+  global data
+  allTweets(User)
+  if first_word + " " in data:
+    # integer encode text
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts([data])
+    encoded = tokenizer.texts_to_sequences([data])[0]
+    # determine the vocabulary size
+    vocab_size = len(tokenizer.word_index) + 1
+    # create word -> word sequences
+    sequences = list()
+    for i in range(1, len(encoded)):
+      sequence = encoded[i-1:i+1]
+      sequences.append(sequence)
+    # split into X and y elements
+    sequences = array(sequences)
+    X, y = sequences[:,0],sequences[:,1]
+    # one hot encode outputs
+    y = to_categorical(y, num_classes=vocab_size)
+    # define model
+    model = Sequential()
+    model.add(Embedding(vocab_size, 10, input_length=1))
+    model.add(LSTM(50))
+    model.add(Dense(vocab_size, activation='softmax'))
+    print(model.summary())
+    # compile network
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # fit network
+    model.fit(X, y, epochs=500, verbose=2)
+    # serialize model to JSON
+    model_json = model.to_json()
+    with open("model.json", "w") as json_file:
+        json_file.write(model_json)
+    # serialize weights to HDF5
+    model.save_weights("model.h5")
+    return predict()
+  else: 
+    return first_word
+
+#predicts the next word depending on the first word the user types in
+def predict():
+  global data
+  global first_word
   tokenizer = Tokenizer()
   tokenizer.fit_on_texts([data])
-  encoded = tokenizer.texts_to_sequences([data])[0]
-  # determine the vocabulary size
-  vocab_size = len(tokenizer.word_index) + 1
-  print('Vocabulary Size: %d' % vocab_size)
-  # create word -> word sequences
-  sequences = list()
-  for i in range(1, len(encoded)):
-    sequence = encoded[i-1:i+1]
-    sequences.append(sequence)
-  print('Total Sequences: %d' % len(sequences))
-  # split into X and y elements
-  sequences = array(sequences)
-  X, y = sequences[:,0],sequences[:,1]
-  # one hot encode outputs
-  y = to_categorical(y, num_classes=vocab_size)
-  # define model
-  model = Sequential()
-  model.add(Embedding(vocab_size, 10, input_length=1))
-  model.add(LSTM(50))
-  model.add(Dense(vocab_size, activation='softmax'))
-  print(model.summary())
-  # compile network
-  model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-  # fit network
-  model.fit(X, y, epochs=500, verbose=2)
-  # serialize model to JSON
-  model_json = model.to_json()
-  with open("model.json", "w") as json_file:
-      json_file.write(model_json)
-  # serialize weights to HDF5
-  model.save_weights("model.h5")
-  print("Saved model to disk")
-  predict()
-
-def predict():
   # load json and create model
   json_file = open('model.json', 'r')
   loaded_model_json = json_file.read()
@@ -88,50 +100,66 @@ def predict():
   loaded_model = model_from_json(loaded_model_json)
   # load weights into new model
   loaded_model.load_weights("model.h5")
-  print("Loaded model from disk")
-  
   # evaluate loaded model on test data
   loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-  score = loaded_model.evaluate(X, Y, verbose=0)
-  print(generate_seq(model, tokenizer, 'To', 6))
+  return generate_seq(loaded_model, tokenizer, first_word, 6)
 
+#allows user to reply to a tweet
 def reply(request, id):
   tweet = Tweet.objects.get(id=id)
   if request.method == "POST":
     content = request.POST["content"]
+    #create reply
     reply = Replies.objects.create(content=content, tweet=tweet, author=request.user.username)
-  replies = Replies.objects.filter(tweet=tweet)
+  #gets the list of replies
+  replies = Replies.objects.filter(tweet=tweet).order_by('-time')
   return render(request, "reply.html", {"tweet": tweet, "replies": replies})  
+
+#allows user to submit one word and automatically generates rest of the sentence
+def automatic_reply(request, id):
+  global first_word
+  tweet = Tweet.objects.get(id=id)
+  if request.method == "POST":
+    #gets the first word so that we can train model and generate sequence of text
+    first_word = request.POST["first_word"].lower()
+    #train the model
+    content = trainModel(User.objects.get(username=tweet.author))
+    #create reply
+    reply = Replies.objects.create(content=content, tweet=tweet, author=request.user.username)
+    #get lists of replies
+    replies = Replies.objects.filter(tweet=tweet).order_by('-time')
+    return render(request, "reply.html", {"tweet": tweet, "reply": reply, "replies": replies})  
+  return render(request, "reply.html", {})
 
 def splash(request):
   if request.method == "POST":
     content = request.POST["content"]
+    #create new tweet
     tweet = Tweet.objects.create(content=content, author=request.user.username)
+    #gets hashtag
     tags = {tag.strip("#") for tag in content.replace('#', ' #').split() if tag.startswith("#")}
-    print(tags)
- #    tag = request.POST["hashtag"]
- #   hasht = tag.strip()
- #   hashtag = hasht.replace(" ", "") """
     for tag in tags:
       tagExists = False
       for hashtag in Hashtag.objects.all():
         if tag == hashtag.name:
           hashtag.tweets.add(tweet)
           tagExists = True
-
       if tagExists is False:
         newtag = Hashtag.objects.create(name=tag)
         newtag.tweets.add(tweet)
-    trainModel()
+  #get list of tweets
   tweets = Tweet.objects.all().order_by("id").reverse()
-
   return render(request, "splash.html", {"tweets": tweets})
 
 def like(request, id):
+  #get the tweet id that is liked
   tweet = Tweet.objects.get(id=id)
+  #if user already liked
   if request.user in tweet.likes.all():
+    #user unlikes the tweet
     tweet.likes.remove(request.user)
   else:
+    #user likes the tweet
     tweet.likes.add(request.user)
   tweet.save()
   tweet.refresh_from_db()
@@ -161,10 +189,12 @@ def home(request):
   return render(request, "home.html", {})  
   
 def myprofile(request):
+  #gets the tweet associated to the user that is logged in
   tweets = Tweet.objects.filter(author=request.user.username)
   return render(request, "profile.html", {"tweets": tweets, "user": "me"}) 
 
 def profile(request, id):
+  #gets the tweet associated to the user 
   user = User.objects.get(username=id)
   tweets = Tweet.objects.filter(author=user)
   return render(request, "profile.html", {"tweets": tweets, "user": user.username}) 
