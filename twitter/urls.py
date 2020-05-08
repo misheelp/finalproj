@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from core.views import splash, signup_view, reply, logout_, myprofile, home, delete, profile, login_, hashtag, like
+from core.views import splash, signup_view, automatic_reply, reply, logout_, myprofile, home, delete, profile, login_, hashtag, like
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('reply/<int:id>', reply, name='reply'),
+    path('automatic_reply/<int:id>', automatic_reply, name='automatic_reply'),
     path('', splash, name='splash'),
     path('signup', signup_view, name='signup'),
     path('login', login_, name='signup'),
