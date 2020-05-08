@@ -14,7 +14,6 @@
         <a class="has-text-info">Twitter</a>
       </h1>
       
-      <div class="columns">
         <div class="column is-3"></div>
         <div class="column is-6 container has-text-left">
           <div class="box content">
@@ -48,13 +47,12 @@
               {%endif %}
             </nav>
           </div>
-        </div>
         <form method="POST" action="{% url 'reply' id=tweet.id%}">
           <label class="title is-4">Reply</label>
           {% csrf_token %}
           <div class="field">
             <div class="control">
-              <input class="input"style="margin-top: 10px;" name="content" placeholder="insert content here" />
+              <input class="input"style="margin-top: 10px;" name="content" placeholder="insert content here" rows="4" cols="53" />
             </div>
           </div>
           <input class="button is-info is-outlined" type="submit" value="Create Reply" style="margin-bottom: 10px;"/>
@@ -96,11 +94,6 @@
     </div>
       
       <a class="btn btn-primary" href="/">Back</a>
-      {% if user.is_authenticated %}
-      <a class="btn btn-primary" href='logout'>logout</a>
-      {% else %}
-      <a class="btn btn-primary" href='login'>login</a>
-      {% endif %}
     </div>
   </section>
   </body>

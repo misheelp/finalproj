@@ -45,7 +45,7 @@ def allTweets(User):
   for t in tweet:
     for r in Replies.objects.filter(tweet=t):
       list_of_replies.append(r.content.lower())
-  data = "".join(list_of_replies)
+  data = " ".join(list_of_replies)
 
 def trainModel(User):
   global data
