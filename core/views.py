@@ -113,7 +113,8 @@ def reply(request, id):
     reply = Replies.objects.create(content=content, tweet=tweet, author=request.user.username)
   #gets the list of replies
   replies = Replies.objects.filter(tweet=tweet).order_by('-time')
-  return render(request, "reply.html", {"tweet": tweet, "replies": replies})  
+  length = len(tweet)
+  return render(request, "reply.html", {"tweet": tweet, "replies": replies, "length": length})  
 
 #allows user to submit one word and automatically generates rest of the sentence
 def automatic_reply(request, id):
