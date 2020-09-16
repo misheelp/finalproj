@@ -1,5 +1,4 @@
 # Readme
-### Collaborator: Shannon Suhendra
 ### **Installation**
 
 * First install all the necessary packages (namely Keras, Tensorflow, numpy, and Bulma)
